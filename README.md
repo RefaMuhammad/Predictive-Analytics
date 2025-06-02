@@ -143,9 +143,6 @@ Beberapa langkah eksplorasi data dilakukan untuk memahami distribusi dan karakte
   - `TotalBsmtSF`: 0.61
   - `1stFlrSF`: 0.61
 
-- **Outlier detection**:
-  Beberapa outlier terdeteksi, terutama pada `GrLivArea` > 4000 dengan harga yang rendah. Beberapa outlier dibuang karena berpotensi mempengaruhi hasil regresi secara signifikan.
-
 - **Missing Value Analysis**:
   Visualisasi missing value dilakukan menggunakan heatmap. Fitur-fitur dengan missing value tinggi seperti `PoolQC`, `Fence`, `MiscFeature` di-drop karena lebih dari 50% datanya kosong. Fitur lain diimputasi dengan metode yang sesuai.
 
@@ -157,23 +154,15 @@ Tahapan data preparation dilakukan secara berurutan dan menyeluruh sebagai berik
    - Fitur dengan >50% missing (`PoolQC`, `Fence`, `MiscFeature`, `Alley`) dihapus.
    - Kategorikal dengan missing <5% diisi dengan modus (`Electrical`, `GarageType`, `BsmtQual`).
    - Numerik dengan missing <5% diisi dengan median (`LotFrontage`, `MasVnrArea`).
-
-2. **Feature Engineering**:
-   - Pembuatan fitur baru: `TotalSF` (jumlah dari `TotalBsmtSF`, `1stFlrSF`, `2ndFlrSF`)
-   - Transformasi log terhadap `SalePrice` untuk distribusi lebih normal.
+     
+2. **Outlier detection**:
+   -  Beberapa outlier terdeteksi, terutama pada `EnclosedPorch` dengan 208 outliers 14.25% dari total data. Beberapa outlier dibuang karena berpotensi mempengaruhi hasil regresi secara signifikan.
 
 3. **Encoding**:
    - Ordinal Encoding untuk fitur seperti `ExterQual`, `KitchenQual` (karena urutan penting).
    - OneHot Encoding untuk fitur nominal seperti `Neighborhood`, `BldgType`, `HouseStyle`.
 
-4. **Scaling**:
-   - Fitur numerik distandarisasi menggunakan `StandardScaler` untuk menghindari dominasi fitur dengan skala besar.
-
-5. **Feature Selection**:
-   - Korelasi dan *feature importance* digunakan untuk memilih fitur signifikan.
-   - Model dengan semua fitur vs model dengan top 20 fitur dibandingkan (lihat evaluasi).
-
-6. **Splitting Data**:
+4. **Splitting Data**:
    - Data dibagi menjadi 80% train dan 20% test menggunakan stratified split pada harga log(SalePrice).
 
 ## Modeling
@@ -198,9 +187,9 @@ Tahapan data preparation dilakukan secara berurutan dan menyeluruh sebagai berik
 ### Feature Selection:
 Model diuji dalam dua versi:
 - Menggunakan **semua fitur** hasil preprocessing.
-- Menggunakan **top 20 fitur** berdasarkan `feature importance` dan korelasi.
+- Menggunakan **top 14 fitur** berdasarkan `feature importance` dan korelasi.
 
-Model dengan top 20 fitur menghasilkan waktu komputasi lebih cepat dengan penurunan akurasi yang sangat kecil (sekitar 0.005 R²). Maka, model final menggunakan semua fitur untuk akurasi maksimal.
+Model dengan top 14 fitur menghasilkan waktu komputasi lebih cepat dengan penurunan akurasi yang sangat kecil (sekitar 0.005 R²). Maka, model final menggunakan semua fitur untuk akurasi maksimal.
 
 ## Evaluation
 
@@ -215,7 +204,7 @@ Model dengan top 20 fitur menghasilkan waktu komputasi lebih cepat dengan penuru
 | Gradient Boosting        | 0.138    | 0.94     | Semua fitur      |
 | Gradient Boosting        | 0.142    | 0.935    | Top 20 fitur     |
 
-Model Gradient Boosting memberikan hasil terbaik secara konsisten. Walaupun model dengan 20 fitur hanya sedikit lebih buruk, model dengan semua fitur tetap dipilih karena tujuannya adalah akurasi maksimal.
+Model Gradient Boosting memberikan hasil terbaik secara konsisten. Walaupun model dengan 14 fitur hanya sedikit lebih buruk, model dengan semua fitur tetap dipilih karena tujuannya adalah akurasi maksimal.
 
 
 ### Kesimpulan:
