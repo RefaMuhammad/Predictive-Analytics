@@ -12,6 +12,9 @@ Proyek ini bertujuan membangun model regresi untuk memprediksi harga jual rumah 
 Referensi pendukung untuk domain ini termasuk:
 - De Cock, D. (2011). Ames, Iowa: Alternative to the Boston Housing Data as an End of Semester Regression Project. *Journal of Statistics Education*, 19(3). https://doi.org/10.1080/10691898.2011.11889627
 - A. Kumar, S. Aggarwal and N. Kumar, "Predicting House Prices Using Machine Learning Algorithms: A Review," *2020 International Conference on Computational Performance Evaluation (ComPE)*, 2020.
+- Barr, J., Ellis, E. A., Kassab, A., Redfearn, C. L., Srinivasan, N. N., & Voris, K. B. (2017). Home Price Index: A Machine Learning Methodology. International Journal of Semantic Computing, 11(1), 111–133. https://doi.org/10.1142/S1793351X17500015
+- Park, B., & Bae, J. K. (2015). Using machine learning algorithms for housing price prediction: The case of Fairfax County, Virginia housing data. Expert Systems with Applications, 42(6), 2928–2934. https://doi.org/10.1016/j.eswa.2014.11.040
+- Yazdani, M. (2021). Machine Learning, Deep Learning, and Hedonic Methods for Real Estate Price Prediction. arXiv preprint arXiv:2110.07151. https://arxiv.org/abs/2110.07151
 
 ## Business Understanding
 
