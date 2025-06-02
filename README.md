@@ -45,8 +45,6 @@ Jumlah fitur: 81 (80 fitur input + 1 target/output)
 
 ### Penjelasan Setiap Fitur dalam Dataset:
 
-_(Hanya 10 fitur pertama ditampilkan di sini. Semua 81 fitur akan dilanjutkan dalam file lengkap.)_
-
 1. **Id**: Nomor urut unik untuk setiap entri rumah.
 2. **MSSubClass**: Tipe bangunan yang dikodekan (misal: 20 = 1-story 1946 & newer).
 3. **MSZoning**: Kategori zona lahan (misal: RL = Residential Low Density).
@@ -57,8 +55,76 @@ _(Hanya 10 fitur pertama ditampilkan di sini. Semua 81 fitur akan dilanjutkan da
 8. **LotShape**: Bentuk lahan (Reg = Regular, IR1/2/3 = Irregular).
 9. **LandContour**: Kontur lahan (Flat, HLS = Hillside, Bnk = Banked).
 10. **Utilities**: Ketersediaan utilitas publik.
-
-_(Fitur 11–80 akan dilanjutkan di bawah bagian ini dalam file lengkap)_
+11. **LotConfig**: Konfigurasi bentuk lot rumah (Inside, Corner, CulDSac, FR2, FR3).
+12. **LandSlope**: Kemiringan lahan (Gtl = Gentle, Mod = Moderate, Sev = Severe).
+13. **Neighborhood**: Lingkungan sekitar tempat tinggal.
+14. **Condition1**: Kondisi rumah relatif terhadap jalan utama atau rel kereta.
+15. **Condition2**: Kondisi kedua jika ada (misalnya rumah di antara dua rel kereta).
+16. **BldgType**: Jenis bangunan (1Fam, 2fmCon, Duplex, Twnhs, TwnhsE).
+17. **HouseStyle**: Gaya rumah (1Story, 2Story, 1.5Fin, SLvl, SFoyer, dll).
+18. **OverallQual**: Kualitas material dan penyelesaian secara keseluruhan (skala 1–10).
+19. **OverallCond**: Kondisi keseluruhan rumah (skala 1–10).
+20. **YearBuilt**: Tahun rumah dibangun.
+21. **YearRemodAdd**: Tahun renovasi terakhir atau tambahan struktur.
+22. **RoofStyle**: Gaya atap (Flat, Gable, Hip, etc.).
+23. **RoofMatl**: Material atap (CompShg, Metal, WdShngl, dll).
+24. **Exterior1st**: Material eksterior utama.
+25. **Exterior2nd**: Material eksterior sekunder (jika ada).
+26. **MasVnrType**: Jenis veneer batu (None, BrkFace, Stone, dll).
+27. **MasVnrArea**: Luas veneer batu dalam kaki persegi.
+28. **ExterQual**: Kualitas eksterior (Ex, Gd, TA, Fa, Po).
+29. **ExterCond**: Kondisi eksterior (Ex, Gd, TA, Fa, Po).
+30. **Foundation**: Jenis fondasi rumah.
+31. **BsmtQual**: Kualitas basement.
+32. **BsmtCond**: Kondisi basement.
+33. **BsmtExposure**: Tingkat eksposur basement terhadap luar.
+34. **BsmtFinType1**: Jenis penyelesaian utama di basement.
+35. **BsmtFinSF1**: Luas penyelesaian utama basement.
+36. **BsmtFinType2**: Jenis penyelesaian sekunder di basement.
+37. **BsmtFinSF2**: Luas penyelesaian sekunder basement.
+38. **BsmtUnfSF**: Luas basement yang tidak selesai.
+39. **TotalBsmtSF**: Total luas basement.
+40. **Heating**: Jenis pemanas (GasA, Wall, etc.).
+41. **HeatingQC**: Kualitas dan kondisi sistem pemanas.
+42. **CentralAir**: Apakah ada AC sentral (Y/N).
+43. **Electrical**: Sistem kelistrikan (SBrkr, FuseA, FuseF, etc.).
+44. **1stFlrSF**: Luas lantai pertama.
+45. **2ndFlrSF**: Luas lantai kedua.
+46. **LowQualFinSF**: Luas area dengan kualitas rendah.
+47. **GrLivArea**: Luas area tinggal di atas tanah.
+48. **BsmtFullBath**: Jumlah kamar mandi penuh di basement.
+49. **BsmtHalfBath**: Jumlah kamar mandi setengah di basement.
+50. **FullBath**: Jumlah kamar mandi penuh di atas tanah.
+51. **HalfBath**: Jumlah kamar mandi setengah di atas tanah.
+52. **BedroomAbvGr**: Jumlah kamar tidur di atas tanah.
+53. **KitchenAbvGr**: Jumlah dapur di atas tanah.
+54. **KitchenQual**: Kualitas dapur (Ex, Gd, TA, Fa, Po).
+55. **TotRmsAbvGrd**: Total ruangan di atas tanah (tidak termasuk kamar mandi).
+56. **Functional**: Fungsionalitas rumah (Typ, Min1, Maj1, etc.).
+57. **Fireplaces**: Jumlah perapian.
+58. **FireplaceQu**: Kualitas perapian.
+59. **GarageType**: Tipe garasi (Attached, Detached, BuiltIn, etc.).
+60. **GarageYrBlt**: Tahun pembangunan garasi.
+61. **GarageFinish**: Penyelesaian interior garasi.
+62. **GarageCars**: Kapasitas mobil di garasi.
+63. **GarageArea**: Luas garasi.
+64. **GarageQual**: Kualitas garasi.
+65. **GarageCond**: Kondisi garasi.
+66. **PavedDrive**: Apakah jalan masuk dipaving (Y, P, N).
+67. **WoodDeckSF**: Luas dek kayu.
+68. **OpenPorchSF**: Luas beranda terbuka.
+69. **EnclosedPorch**: Luas beranda tertutup.
+70. **3SsnPorch**: Luas beranda 3 musim.
+71. **ScreenPorch**: Luas beranda dengan kelambu.
+72. **PoolArea**: Luas kolam renang.
+73. **PoolQC**: Kualitas kolam.
+74. **Fence**: Kualitas pagar.
+75. **MiscFeature**: Fitur tambahan seperti lift atau rumah penyimpanan.
+76. **MiscVal**: Nilai dari fitur tambahan.
+77. **MoSold**: Bulan penjualan rumah.
+78. **YrSold**: Tahun penjualan rumah.
+79. **SaleType**: Tipe penjualan (WD, New, COD, dll).
+80. **SaleCondition**: Kondisi penjualan (Normal, Abnorml, Partial, dll).
 
 Target variabel: **SalePrice** – Harga jual rumah dalam dolar.
 
