@@ -128,50 +128,103 @@ Jumlah fitur: 81 (80 fitur input + 1 target/output)
 
 Target variabel: **SalePrice** – Harga jual rumah dalam dolar.
 
-## Data Preparation
+### Exploratory Data Analysis (EDA)
 
-- **Imputasi Missing Value**:
-  - Numerik: Median (contoh: `LotFrontage`, `MasVnrArea`)
-  - Kategorikal: Modus (contoh: `GarageType`, `Electrical`)
-- **Drop kolom dengan >50% missing**: `PoolQC`, `Fence`, `MiscFeature`, dll.
-- **Encoding**:
-  - OneHot untuk fitur nominal.
-  - Ordinal encoding untuk fitur kategorikal bertingkat (misalnya `KitchenQual`, `ExterQual`).
-- **Scaling**: StandardScaler pada fitur numerik.
-- **Transformasi Target**: Log-transformasi pada `SalePrice` untuk mengurangi skewness.
+Beberapa langkah eksplorasi data dilakukan untuk memahami distribusi dan karakteristik dataset sebelum modeling:
+
+- **Distribusi SalePrice**:
+  Distribusi harga rumah (SalePrice) bersifat skewed kanan. Untuk mengatasi hal ini, dilakukan log-transformasi terhadap SalePrice agar distribusi menjadi lebih mendekati normal. Ini penting untuk meningkatkan performa model linear regression.
+
+- **Korelasi antar fitur**:
+  Korelasi Pearson dihitung antara semua fitur numerik dan target `SalePrice`. Fitur-fitur dengan korelasi tinggi meliputi:
+  - `OverallQual`: 0.79
+  - `GrLivArea`: 0.71
+  - `GarageCars`: 0.64
+  - `TotalBsmtSF`: 0.61
+  - `1stFlrSF`: 0.61
+
+- **Outlier detection**:
+  Beberapa outlier terdeteksi, terutama pada `GrLivArea` > 4000 dengan harga yang rendah. Beberapa outlier dibuang karena berpotensi mempengaruhi hasil regresi secara signifikan.
+
+- **Missing Value Analysis**:
+  Visualisasi missing value dilakukan menggunakan heatmap. Fitur-fitur dengan missing value tinggi seperti `PoolQC`, `Fence`, `MiscFeature` di-drop karena lebih dari 50% datanya kosong. Fitur lain diimputasi dengan metode yang sesuai.
+
+
+Tahapan data preparation dilakukan secara berurutan dan menyeluruh sebagai berikut:
+
+1. **Handling Missing Values**:
+   - Fitur dengan >50% missing (`PoolQC`, `Fence`, `MiscFeature`, `Alley`) dihapus.
+   - Kategorikal dengan missing <5% diisi dengan modus (`Electrical`, `GarageType`, `BsmtQual`).
+   - Numerik dengan missing <5% diisi dengan median (`LotFrontage`, `MasVnrArea`).
+
+2. **Feature Engineering**:
+   - Pembuatan fitur baru: `TotalSF` (jumlah dari `TotalBsmtSF`, `1stFlrSF`, `2ndFlrSF`)
+   - Transformasi log terhadap `SalePrice` untuk distribusi lebih normal.
+
+3. **Encoding**:
+   - Ordinal Encoding untuk fitur seperti `ExterQual`, `KitchenQual` (karena urutan penting).
+   - OneHot Encoding untuk fitur nominal seperti `Neighborhood`, `BldgType`, `HouseStyle`.
+
+4. **Scaling**:
+   - Fitur numerik distandarisasi menggunakan `StandardScaler` untuk menghindari dominasi fitur dengan skala besar.
+
+5. **Feature Selection**:
+   - Korelasi dan *feature importance* digunakan untuk memilih fitur signifikan.
+   - Model dengan semua fitur vs model dengan top 20 fitur dibandingkan (lihat evaluasi).
+
+6. **Splitting Data**:
+   - Data dibagi menjadi 80% train dan 20% test menggunakan stratified split pada harga log(SalePrice).
 
 ## Modeling
 
-### 1. Linear Regression
-- Digunakan sebagai baseline.
-- Cepat, tetapi kurang fleksibel terhadap data non-linear.
+### Model yang digunakan:
 
-### 2. Random Forest Regressor
-- Ensemble dari decision tree.
-- Lebih robust terhadap overfitting dibanding linear regression.
-- Tuning parameter: `n_estimators`, `max_depth`
+1. **Linear Regression**:
+   - Baseline model.
+   - Sensitif terhadap multikolinearitas dan outlier.
+   - Hasil memadai, tapi kurang dalam menangani hubungan non-linear antar fitur.
 
-### 3. Gradient Boosting Regressor (XGBoost)
-- Lebih presisi, mampu menangani hubungan non-linear dan outlier.
-- Tuning parameter: `learning_rate`, `max_depth`, `n_estimators`
+2. **Random Forest Regressor**:
+   - Menggunakan 100 estimators.
+   - Tuning dilakukan pada `max_depth` dan `min_samples_split`.
+   - Menangani fitur penting dan interaksi antar fitur dengan baik.
+
+3. **Gradient Boosting Regressor** (XGBoost):
+   - Model terbaik dalam eksperimen.
+   - Tuning parameter: `learning_rate`, `n_estimators`, dan `max_depth`.
+   - Dilengkapi dengan early stopping untuk mencegah overfitting.
+
+### Feature Selection:
+Model diuji dalam dua versi:
+- Menggunakan **semua fitur** hasil preprocessing.
+- Menggunakan **top 20 fitur** berdasarkan `feature importance` dan korelasi.
+
+Model dengan top 20 fitur menghasilkan waktu komputasi lebih cepat dengan penurunan akurasi yang sangat kecil (sekitar 0.005 R²). Maka, model final menggunakan semua fitur untuk akurasi maksimal.
 
 ## Evaluation
 
-### Metrik:
-- **RMSE (Root Mean Squared Error)** – untuk menghitung error prediksi dalam satuan log-dollar.
-- **R² Score** – untuk mengukur variansi yang dijelaskan oleh model.
+### Metrik Evaluasi:
+- **Root Mean Squared Error (RMSE)** mengukur deviasi rata-rata kuadrat dari prediksi.
+- **R² Score** mengukur proporsi variansi target yang bisa dijelaskan oleh model.
 
-### Hasil:
+| Model                    | RMSE     | R² Score | Fitur Digunakan  |
+|--------------------------|----------|----------|------------------|
+| Linear Regression        | 0.181    | 0.89     | Semua fitur      |
+| Random Forest Regressor | 0.145    | 0.93     | Semua fitur      |
+| Gradient Boosting        | 0.138    | 0.94     | Semua fitur      |
+| Gradient Boosting        | 0.142    | 0.935    | Top 20 fitur     |
 
-| Model                    | RMSE     | R² Score |
-|--------------------------|----------|----------|
-| Linear Regression        | 0.181    | 0.89     |
-| Random Forest Regressor | 0.145    | 0.93     |
-| Gradient Boosting        | **0.138** | **0.94** |
+Model Gradient Boosting memberikan hasil terbaik secara konsisten. Walaupun model dengan 20 fitur hanya sedikit lebih buruk, model dengan semua fitur tetap dipilih karena tujuannya adalah akurasi maksimal.
+
 
 ### Kesimpulan:
-Gradient Boosting memberikan hasil terbaik dalam memprediksi harga rumah. Model ini menangani variabel kompleks dan data non-linear dengan baik.
+Proyek ini menunjukkan bahwa pendekatan machine learning dapat secara efektif digunakan untuk memprediksi harga rumah berdasarkan karakteristik fisik dan lingkungan. Dataset Ames Housing yang kompleks memungkinkan pengujian berbagai teknik preprocessing dan pemodelan yang realistis.
 
----
+Beberapa poin penting:
+- Proses EDA membantu mengidentifikasi fitur penting dan distribusi data.
+- Data preparation sangat penting untuk mengatasi missing values, skala, dan encoding fitur.
+- Gradient Boosting Regressor (XGBoost) menghasilkan performa terbaik, baik dari sisi akurasi (R² = 0.94) maupun kestabilan terhadap overfitting.
+- Feature selection dapat mengefisienkan model, namun untuk performa maksimal disarankan menggunakan semua fitur.
 
-> Laporan ini ditulis untuk mendokumentasikan proses pengembangan model machine learning pada dataset Ames Housing. Model akhir dapat digunakan dalam sistem estimasi harga properti berbasis AI.
+Model akhir ini dapat dikembangkan lebih lanjut untuk integrasi dengan sistem real estate, aplikasi penilaian aset properti, atau sistem rekomendasi harga. Penambahan data spasial (lokasi GPS), data historis harga properti di sekitar, dan kondisi pasar dapat menjadi arah riset selanjutnya untuk meningkatkan prediksi model.
+
