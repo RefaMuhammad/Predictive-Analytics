@@ -149,6 +149,7 @@ Beberapa langkah eksplorasi data dilakukan untuk memahami distribusi dan karakte
 - **Missing Value Analysis**:
   Visualisasi missing value dilakukan menggunakan heatmap. Fitur-fitur dengan missing value tinggi seperti `PoolQC`, `Fence`, `MiscFeature` di-drop karena lebih dari 50% datanya kosong. Fitur lain diimputasi dengan metode yang sesuai.
 
+## Data Preparation
 
 Tahapan data preparation dilakukan secara berurutan dan menyeluruh sebagai berikut:
 
