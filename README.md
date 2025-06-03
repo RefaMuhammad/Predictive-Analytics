@@ -168,40 +168,79 @@ Tahapan data preparation dilakukan secara berurutan dan menyeluruh sebagai berik
 
 ## Modeling
 
-### Model yang digunakan:
+### Model 1: Linear Regression
 
-1. **Linear Regression**:
+#### Cara Kerja:
 
-   - Baseline model.
-   - Sensitif terhadap multikolinearitas dan outlier.
-   - Hasil memadai, tapi kurang dalam menangani hubungan non-linear antar fitur.
+Linear Regression bekerja dengan mencari hubungan linier antara variabel input (fitur) dan output (target). Model ini meminimalkan jumlah kuadrat kesalahan (mean squared error) untuk mendapatkan garis terbaik yang merepresentasikan data.
 
-2. **Random Forest Regressor**:
+#### Parameter:
 
-   - Menggunakan 100 estimators.
-   - Tuning dilakukan pada `max_depth` dan `min_samples_split`.
-   - Menangani fitur penting dan interaksi antar fitur dengan baik.
+- `fit_intercept=True`: menyertakan bias (intersep) dalam model.
+- `normalize=False`: tidak digunakan karena data sudah melalui proses scaling.
+- Semua parameter lainnya menggunakan nilai default.
 
-3. **Gradient Boosting Regressor** (XGBoost):
-   - Model terbaik dalam eksperimen.
-   - Tuning parameter: `learning_rate`, `n_estimators`, dan `max_depth`.
-   - Dilengkapi dengan early stopping untuk mencegah overfitting.
+#### Kelebihan:
++ Mudah diimplementasikan dan cepat dilatih.
++ Hasil model mudah untuk diinterpretasikan oleh pengguna non-teknis.
 
-### Feature Selection:
+#### Kekurangan:
+− Tidak cocok untuk hubungan non-linear antar variabel.  
+− Sensitif terhadap outlier dan multikolinearitas.
 
-Model diuji dalam dua versi:
+---
 
-- Menggunakan **semua fitur** hasil preprocessing.
-- Menggunakan **top 14 fitur** berdasarkan `feature importance` dan korelasi.
+### Model 2: Random Forest Regressor
 
-Model dengan top 14 fitur menghasilkan waktu komputasi lebih cepat dengan penurunan akurasi yang sangat kecil (sekitar 0.005 R²). Maka, model final menggunakan semua fitur untuk akurasi maksimal.
+#### Cara Kerja:
+
+Random Forest adalah algoritma ensemble yang membangun banyak pohon keputusan dan menggabungkan hasilnya (rata-rata) untuk membuat prediksi regresi. Setiap pohon dibangun dari subset data dan subset fitur secara acak (_bagging_), sehingga meningkatkan generalisasi dan mengurangi overfitting.
+
+#### Parameter:
+
+- `n_estimators=100`: jumlah pohon dalam hutan.
+- `max_depth=10`: batas kedalaman pohon untuk menghindari overfitting.
+- `min_samples_split=5`: jumlah minimal sampel untuk membagi node.
+
+#### Kelebihan:
++ Mampu menangkap hubungan non-linear antar fitur.  
++ Relatif tahan terhadap overfitting dan outlier.
+
+#### Kekurangan:
+− Interpretasi model lebih kompleks daripada linear regression.  
+− Proses pelatihan dan prediksi memerlukan waktu dan memori lebih besar.
+
+---
+
+### Model 3: Gradient Boosting Regressor (XGBoost)
+
+#### Cara Kerja:
+
+Gradient Boosting membangun model secara bertahap. Setiap model baru dibuat untuk memperbaiki kesalahan model sebelumnya menggunakan pendekatan _gradient descent_. XGBoost adalah versi yang dioptimalkan untuk efisiensi dan kecepatan, serta dilengkapi regularisasi untuk mencegah overfitting.
+
+#### Parameter:
+
+- `learning_rate=0.1`: mengontrol kontribusi setiap pohon.
+- `n_estimators=200`: jumlah boosting rounds.
+- `max_depth=4`: kedalaman maksimum tiap pohon.
+- `early_stopping_rounds=10`: menghentikan pelatihan jika validasi tidak membaik.
+
+#### Kelebihan:
++ Performa prediksi sangat baik pada data tabular.  
++ Mampu menangani fitur yang kompleks dan interaksi antar fitur.
+
+#### Kekurangan:
+− Butuh tuning parameter yang teliti untuk performa optimal.  
+− Proses training lebih lama dan lebih kompleks dibanding model lain.
+
+---
 
 ## Evaluation
 
 ### Metrik Evaluasi:
 
-- **Root Mean Squared Error (RMSE)** mengukur deviasi rata-rata kuadrat dari prediksi.
-- **R² Score** mengukur proporsi variansi target yang bisa dijelaskan oleh model.
+- **Root Mean Squared Error (RMSE)**: mengukur kesalahan prediksi rata-rata dalam skala yang sama dengan target.
+- **R² Score**: proporsi variansi target yang dapat dijelaskan oleh fitur input.
 
 | Model                   | RMSE  | R² Score | Fitur Digunakan |
 | ----------------------- | ----- | -------- | --------------- |
@@ -210,20 +249,39 @@ Model dengan top 14 fitur menghasilkan waktu komputasi lebih cepat dengan penuru
 | Gradient Boosting       | 0.138 | 0.94     | Semua fitur     |
 | Gradient Boosting       | 0.142 | 0.935    | Top 20 fitur    |
 
-Model Gradient Boosting memberikan hasil terbaik secara konsisten. Walaupun model dengan 14 fitur hanya sedikit lebih buruk, model dengan semua fitur tetap dipilih karena tujuannya adalah akurasi maksimal.
+### Analisis dan Hubungan dengan Business Understanding:
 
-### Kesimpulan:
+Model Gradient Boosting memberikan performa terbaik dengan RMSE terendah dan R² tertinggi (0.94), menandakan bahwa model mampu menjelaskan 94% variasi harga rumah berdasarkan fitur yang tersedia.
 
-Proyek ini menunjukkan bahwa pendekatan machine learning dapat secara efektif digunakan untuk memprediksi harga rumah berdasarkan karakteristik fisik dan lingkungan. Dataset Ames Housing yang kompleks memungkinkan pengujian berbagai teknik preprocessing dan pemodelan yang realistis.
+#### Dampak terhadap Business Understanding:
 
-Beberapa poin penting:
+- **Problem 1** (akurasi prediksi): ✔ Terjawab, model sangat akurat.
+- **Problem 2** (model terbaik): ✔ Terjawab, Gradient Boosting unggul.
+- **Problem 3** (fitur signifikan): ✔ Terjawab, fitur seperti `OverallQual`, `GrLivArea`, dan `GarageCars` terbukti penting.
 
-- Proses EDA membantu mengidentifikasi fitur penting dan distribusi data.
-- Data preparation sangat penting untuk mengatasi missing values, skala, dan encoding fitur.
-- Gradient Boosting Regressor (XGBoost) menghasilkan performa terbaik, baik dari sisi akurasi (R² = 0.94) maupun kestabilan terhadap overfitting.
-- Feature selection dapat mengefisienkan model, namun untuk performa maksimal disarankan menggunakan semua fitur.
+#### Dampak terhadap Solusi Bisnis:
 
-Model akhir ini dapat dikembangkan lebih lanjut untuk integrasi dengan sistem real estate, aplikasi penilaian aset properti, atau sistem rekomendasi harga. Penambahan data spasial (lokasi GPS), data historis harga properti di sekitar, dan kondisi pasar dapat menjadi arah riset selanjutnya untuk meningkatkan prediksi model.
+- Estimasi harga rumah menjadi **otomatis, cepat, dan konsisten**, bermanfaat bagi agen properti dan pengguna individu.
+- Interpretasi fitur penting dapat membantu pengembang real estate memahami faktor utama yang menaikkan nilai jual rumah.
+
+## Kesimpulan
+
+Proyek ini berhasil menunjukkan bagaimana metode machine learning dapat digunakan untuk memprediksi harga rumah berdasarkan berbagai fitur struktural dan lingkungan. Model Gradient Boosting Regressor (XGBoost) terbukti menjadi model terbaik dalam hal akurasi dan kestabilan.
+
+### Poin-poin utama:
+- **Linear Regression** digunakan sebagai baseline, tetapi kurang efektif untuk data kompleks.
+- **Random Forest** menunjukkan peningkatan akurasi dan mampu menangani interaksi antar fitur.
+- **Gradient Boosting** memberikan hasil terbaik (RMSE: 0.138, R²: 0.94), dan digunakan sebagai model akhir.
+- Feature importance berhasil mengidentifikasi fitur paling berpengaruh seperti `OverallQual`, `GrLivArea`, dan `GarageCars`.
+- Evaluasi model terkait erat dengan tujuan bisnis dan menjawab semua problem statements.
+
+Model yang dikembangkan sangat potensial untuk diintegrasikan dalam sistem digital properti, aplikasi valuasi aset, atau alat bantu rekomendasi harga rumah. Ke depan, model dapat dikembangkan lebih lanjut dengan:
+- Menambahkan data spasial (GPS, lokasi kota).
+- Menggunakan data historis harga properti.
+- Mengadopsi teknik ensemble stacking untuk meningkatkan akurasi lebih lanjut.
+
+Secara keseluruhan, proyek ini tidak hanya memenuhi kebutuhan teknis modeling, tetapi juga berkontribusi pada solusi nyata dalam domain valuasi properti berbasis data.
+
 
 ## Referensi
 
