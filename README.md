@@ -1,13 +1,16 @@
-
 # Laporan Proyek Machine Learning - Refa Muhammad
 
 ## Domain Proyek
 
-Pasar properti merupakan salah satu sektor ekonomi yang paling dinamis dan krusial, terutama di negara-negara maju seperti Amerika Serikat. Harga rumah menjadi indikator penting dalam menilai stabilitas ekonomi, kekuatan daya beli masyarakat, dan potensi investasi. Namun, penilaian harga rumah tidaklah sederhana karena melibatkan banyak faktor—mulai dari karakteristik fisik rumah, kondisi lingkungan sekitar, hingga kondisi pasar saat itu.
+Pasar properti merupakan salah satu sektor ekonomi yang sangat vital dalam perekonomian global. Stabilitas dan pertumbuhan harga properti mencerminkan kondisi sosial ekonomi suatu negara, termasuk daya beli masyarakat, perkembangan kawasan pemukiman, serta arah kebijakan fiskal dan moneter. Di Amerika Serikat, harga rumah menjadi indikator penting yang digunakan dalam berbagai keputusan investasi dan perencanaan pembangunan kota [4].
 
-Tradisionalnya, penilaian rumah dilakukan oleh penilai profesional berdasarkan inspeksi fisik dan data historis. Proses ini tidak hanya mahal dan memakan waktu, tetapi juga mengandung unsur subjektivitas. Oleh karena itu, pendekatan berbasis *machine learning* menawarkan solusi yang menjanjikan: prediksi harga rumah secara otomatis, cepat, dan konsisten berdasarkan data historis dan atribut rumah.
+Proses penilaian harga rumah selama ini dilakukan secara manual oleh profesional properti melalui inspeksi langsung, pembandingan data historis, dan pendekatan penilaian subjektif. Namun, pendekatan ini memiliki banyak keterbatasan, terutama dalam hal efisiensi waktu, biaya operasional, dan konsistensi hasil penilaian. Penelitian modern menyarankan bahwa metode berbasis machine learning dapat digunakan untuk membangun model otomatis yang tidak hanya efisien tetapi juga mampu mendeteksi pola kompleks dalam data properti [2].
 
-Proyek ini bertujuan membangun model regresi untuk memprediksi harga jual rumah di kota Ames, Iowa, menggunakan dataset "Ames Housing". Dataset ini populer dalam riset akademik dan dianggap sebagai versi perbaikan dari dataset klasik Boston Housing. Dengan lebih dari 80 fitur, dataset ini menawarkan kompleksitas yang cukup untuk pengujian berbagai model machine learning.
+Model machine learning memungkinkan sistem untuk mempelajari hubungan antara berbagai atribut rumah — seperti ukuran, kualitas bangunan, lokasi, dan usia — dengan harga jual aktualnya. Hal ini memberikan potensi besar dalam otomasi proses valuasi aset, khususnya untuk platform digital, lembaga keuangan, maupun konsultan properti [5].
+
+Dataset yang digunakan dalam proyek ini adalah **Ames Housing**, yang disusun oleh Dean De Cock dan disediakan secara publik untuk keperluan akademik dan pengujian algoritma prediktif. Dataset ini dinilai lebih baik daripada dataset Boston Housing yang telah banyak digunakan sebelumnya karena menyediakan lebih dari 80 fitur yang mencakup dimensi struktural, fungsional, dan lingkungan rumah [1].
+
+Selain dari struktur dan kelengkapan fitur, dataset Ames Housing juga mendukung eksperimen model prediktif lanjutan karena kualitas datanya yang baik, proporsi missing value yang dapat ditangani, dan dokumentasi yang jelas. Oleh karena itu, dataset ini sangat cocok digunakan sebagai studi kasus penerapan regresi dalam machine learning, termasuk untuk model seperti regresi linier, Random Forest, dan Gradient Boosting [3].
 
 ## Business Understanding
 
@@ -133,6 +136,7 @@ Beberapa langkah eksplorasi data dilakukan untuk memahami distribusi dan karakte
 
 - **Korelasi antar fitur**:
   Korelasi Pearson dihitung antara semua fitur numerik dan target `SalePrice`. Fitur-fitur dengan korelasi tinggi meliputi:
+
   - `OverallQual`: 0.79
   - `GrLivArea`: 0.71
   - `GarageCars`: 0.64
@@ -150,11 +154,12 @@ Tahapan data preparation dilakukan secara berurutan dan menyeluruh sebagai berik
    - Fitur dengan >50% missing (`PoolQC`, `Fence`, `MiscFeature`, `Alley`) dihapus.
    - Kategorikal dengan missing <5% diisi dengan modus (`Electrical`, `GarageType`, `BsmtQual`).
    - Numerik dengan missing <5% diisi dengan median (`LotFrontage`, `MasVnrArea`).
-     
 2. **Outlier detection**:
-   -  Beberapa outlier terdeteksi, terutama pada `EnclosedPorch` dengan 208 outliers 14.25% dari total data. Beberapa outlier dibuang karena berpotensi mempengaruhi hasil regresi secara signifikan.
+
+   - Beberapa outlier terdeteksi, terutama pada `EnclosedPorch` dengan 208 outliers 14.25% dari total data. Beberapa outlier dibuang karena berpotensi mempengaruhi hasil regresi secara signifikan.
 
 3. **Encoding**:
+
    - Ordinal Encoding untuk fitur seperti `ExterQual`, `KitchenQual` (karena urutan penting).
    - OneHot Encoding untuk fitur nominal seperti `Neighborhood`, `BldgType`, `HouseStyle`.
 
@@ -166,11 +171,13 @@ Tahapan data preparation dilakukan secara berurutan dan menyeluruh sebagai berik
 ### Model yang digunakan:
 
 1. **Linear Regression**:
+
    - Baseline model.
    - Sensitif terhadap multikolinearitas dan outlier.
    - Hasil memadai, tapi kurang dalam menangani hubungan non-linear antar fitur.
 
 2. **Random Forest Regressor**:
+
    - Menggunakan 100 estimators.
    - Tuning dilakukan pada `max_depth` dan `min_samples_split`.
    - Menangani fitur penting dan interaksi antar fitur dengan baik.
@@ -181,7 +188,9 @@ Tahapan data preparation dilakukan secara berurutan dan menyeluruh sebagai berik
    - Dilengkapi dengan early stopping untuk mencegah overfitting.
 
 ### Feature Selection:
+
 Model diuji dalam dua versi:
+
 - Menggunakan **semua fitur** hasil preprocessing.
 - Menggunakan **top 14 fitur** berdasarkan `feature importance` dan korelasi.
 
@@ -190,23 +199,25 @@ Model dengan top 14 fitur menghasilkan waktu komputasi lebih cepat dengan penuru
 ## Evaluation
 
 ### Metrik Evaluasi:
+
 - **Root Mean Squared Error (RMSE)** mengukur deviasi rata-rata kuadrat dari prediksi.
 - **R² Score** mengukur proporsi variansi target yang bisa dijelaskan oleh model.
 
-| Model                    | RMSE     | R² Score | Fitur Digunakan  |
-|--------------------------|----------|----------|------------------|
-| Linear Regression        | 0.181    | 0.89     | Semua fitur      |
-| Random Forest Regressor | 0.145    | 0.93     | Semua fitur      |
-| Gradient Boosting        | 0.138    | 0.94     | Semua fitur      |
-| Gradient Boosting        | 0.142    | 0.935    | Top 20 fitur     |
+| Model                   | RMSE  | R² Score | Fitur Digunakan |
+| ----------------------- | ----- | -------- | --------------- |
+| Linear Regression       | 0.181 | 0.89     | Semua fitur     |
+| Random Forest Regressor | 0.145 | 0.93     | Semua fitur     |
+| Gradient Boosting       | 0.138 | 0.94     | Semua fitur     |
+| Gradient Boosting       | 0.142 | 0.935    | Top 20 fitur    |
 
 Model Gradient Boosting memberikan hasil terbaik secara konsisten. Walaupun model dengan 14 fitur hanya sedikit lebih buruk, model dengan semua fitur tetap dipilih karena tujuannya adalah akurasi maksimal.
 
-
 ### Kesimpulan:
+
 Proyek ini menunjukkan bahwa pendekatan machine learning dapat secara efektif digunakan untuk memprediksi harga rumah berdasarkan karakteristik fisik dan lingkungan. Dataset Ames Housing yang kompleks memungkinkan pengujian berbagai teknik preprocessing dan pemodelan yang realistis.
 
 Beberapa poin penting:
+
 - Proses EDA membantu mengidentifikasi fitur penting dan distribusi data.
 - Data preparation sangat penting untuk mengatasi missing values, skala, dan encoding fitur.
 - Gradient Boosting Regressor (XGBoost) menghasilkan performa terbaik, baik dari sisi akurasi (R² = 0.94) maupun kestabilan terhadap overfitting.
@@ -214,14 +225,14 @@ Beberapa poin penting:
 
 Model akhir ini dapat dikembangkan lebih lanjut untuk integrasi dengan sistem real estate, aplikasi penilaian aset properti, atau sistem rekomendasi harga. Penambahan data spasial (lokasi GPS), data historis harga properti di sekitar, dan kondisi pasar dapat menjadi arah riset selanjutnya untuk meningkatkan prediksi model.
 
-## Referensi 
-[1] De Cock, D. (2011). Ames, Iowa: Alternative to the Boston Housing Data as an End of Semester Regression Project. *Journal of Statistics Education*, 19(3). https://doi.org/10.1080/10691898.2011.11889627
+## Referensi
 
-[2] A. Kumar, S. Aggarwal and N. Kumar, "Predicting House Prices Using Machine Learning Algorithms: A Review," *2020 International Conference on Computational Performance Evaluation (ComPE)*, 2020.
+[1] De Cock, D. (2011). Ames, Iowa: Alternative to the Boston Housing Data as an End of Semester Regression Project. _Journal of Statistics Education_, 19(3). https://doi.org/10.1080/10691898.2011.11889627
+
+[2] A. Kumar, S. Aggarwal and N. Kumar, "Predicting House Prices Using Machine Learning Algorithms: A Review," _2020 International Conference on Computational Performance Evaluation (ComPE)_, 2020.
 
 [3] Barr, J., Ellis, E. A., Kassab, A., Redfearn, C. L., Srinivasan, N. N., & Voris, K. B. (2017). Home Price Index: A Machine Learning Methodology. International Journal of Semantic Computing, 11(1), 111–133. https://doi.org/10.1142/S1793351X17500015
 
 [4] Park, B., & Bae, J. K. (2015). Using machine learning algorithms for housing price prediction: The case of Fairfax County, Virginia housing data. Expert Systems with Applications, 42(6), 2928–2934. https://doi.org/10.1016/j.eswa.2014.11.040
 
 [5] Yazdani, M. (2021). Machine Learning, Deep Learning, and Hedonic Methods for Real Estate Price Prediction. arXiv preprint arXiv:2110.07151. https://arxiv.org/abs/2110.07151
-
