@@ -148,23 +148,60 @@ Beberapa langkah eksplorasi data dilakukan untuk memahami distribusi dan karakte
 
 ## Data Preparation
 
-Tahapan data preparation dilakukan secara berurutan dan menyeluruh sebagai berikut:
+Tahapan data preparation dilakukan secara menyeluruh melalui langkah-langkah berikut:
 
-1. **Handling Missing Values**:
-   - Fitur dengan >50% missing (`PoolQC`, `Fence`, `MiscFeature`, `Alley`) dihapus.
-   - Kategorikal dengan missing <5% diisi dengan modus (`Electrical`, `GarageType`, `BsmtQual`).
-   - Numerik dengan missing <5% diisi dengan median (`LotFrontage`, `MasVnrArea`).
-2. **Outlier detection**:
+### 1. Handling Missing Values
 
-   - Beberapa outlier terdeteksi, terutama pada `EnclosedPorch` dengan 208 outliers 14.25% dari total data. Beberapa outlier dibuang karena berpotensi mempengaruhi hasil regresi secara signifikan.
+Dilakukan pemeriksaan terhadap nilai yang hilang (`NaN`) pada seluruh kolom. Strategi penanganannya dibedakan berdasarkan tipe dan proporsi nilai hilang:
 
-3. **Encoding**:
+- **Penghapusan Kolom**:
 
-   - Ordinal Encoding untuk fitur seperti `ExterQual`, `KitchenQual` (karena urutan penting).
-   - OneHot Encoding untuk fitur nominal seperti `Neighborhood`, `BldgType`, `HouseStyle`.
+  - Kolom dengan persentase missing >90% dihapus karena dianggap tidak informatif, yaitu: `PoolQC`, `MiscFeature`, dan `Alley`.
 
-4. **Splitting Data**:
-   - Data dibagi menjadi 80% train dan 20% test menggunakan stratified split pada harga log(SalePrice).
+- **Imputasi dengan Nilai Khusus ('None')**:
+
+  - Untuk fitur kategorikal yang menunjukkan keberadaan suatu kondisi seperti garasi, perapian, atau basement, nilai yang hilang diisi dengan `'None'`, antara lain:  
+    `FireplaceQu`, `Fence`, `GarageType`, `GarageFinish`, `GarageQual`, `GarageCond`, `BsmtQual`, `BsmtCond`, `BsmtExposure`, `BsmtFinType1`, `BsmtFinType2`, `MasVnrType`.
+
+- **Imputasi dengan Nilai Statistik**:
+  - `LotFrontage`: Diisi dengan **median** berdasarkan `Neighborhood` agar lebih kontekstual.
+  - `MasVnrArea`: Diisi dengan **0**, menandakan tidak adanya veneer.
+  - `GarageYrBlt`: Diisi dengan **0**, menandakan tidak ada garasi.
+  - `Electrical`: Diisi dengan **modus** (nilai paling sering muncul).
+
+### 2. Outlier Detection and Removal
+
+Outlier pada fitur numerik dideteksi menggunakan metode **IQR (Interquartile Range)**. Fitur dengan outlier signifikan seperti `EnclosedPorch`, `BsmtFinSF2`, dan `ScreenPorch` dibersihkan dari nilai ekstrem yang berada di luar batas bawah (Q1 - 1.5×IQR) dan batas atas (Q3 + 1.5×IQR). Tujuannya adalah meningkatkan performa model dan menjaga distribusi data.
+
+### 3. Feature Encoding
+
+Untuk mengonversi fitur kategorikal ke dalam format numerik yang dapat diproses oleh algoritma machine learning, dilakukan beberapa teknik encoding:
+
+- **Ordinal Encoding**:
+
+  - Diterapkan pada fitur kategorikal yang memiliki urutan nilai, seperti: `ExterQual`, `KitchenQual`, `BsmtQual`, `HeatingQC`, dll.
+
+- **Frequency Encoding**:
+
+  - Diterapkan pada fitur `Neighborhood`, dengan mengganti tiap nilai kategori dengan frekuensi kemunculannya. Ini menghindari ledakan dimensi akibat One-Hot Encoding.
+
+- **Label Encoding**:
+
+  - Diterapkan pada beberapa fitur kategorikal lain seperti: `MSZoning`, `LotShape`, `LandContour`, `Utilities`, `Condition2`, `RoofMatl`, `Street`, dan `BsmtFinType2`. Encoding ini memberikan label numerik unik untuk tiap kategori.
+
+- **One-Hot Encoding**:
+  - Digunakan untuk fitur nominal tertentu jika tidak terlalu banyak kategori unik, misalnya: `BldgType`, `HouseStyle`.
+
+### 5. Data Splitting
+
+Data dibagi menjadi:
+
+- **80% untuk pelatihan (training set)**
+- **20% untuk pengujian (test set)**
+
+Pembagian dilakukan secara acak, dan target `SalePrice` ditransformasi menggunakan logaritma natural (`log(SalePrice)`) untuk menstabilkan varian dan mengatasi skewness distribusi harga rumah.
+
+---
 
 ## Modeling
 
@@ -177,14 +214,15 @@ Linear Regression bekerja dengan mencari hubungan linier antara variabel input (
 #### Parameter:
 
 - `fit_intercept=True`: menyertakan bias (intersep) dalam model.
-- `normalize=False`: tidak digunakan karena data sudah melalui proses scaling.
 - Semua parameter lainnya menggunakan nilai default.
 
 #### Kelebihan:
-+ Mudah diimplementasikan dan cepat dilatih.
-+ Hasil model mudah untuk diinterpretasikan oleh pengguna non-teknis.
+
+- Mudah diimplementasikan dan cepat dilatih.
+- Hasil model mudah untuk diinterpretasikan oleh pengguna non-teknis.
 
 #### Kekurangan:
+
 − Tidak cocok untuk hubungan non-linear antar variabel.  
 − Sensitif terhadap outlier dan multikolinearitas.
 
@@ -199,37 +237,40 @@ Random Forest adalah algoritma ensemble yang membangun banyak pohon keputusan da
 #### Parameter:
 
 - `n_estimators=100`: jumlah pohon dalam hutan.
-- `max_depth=10`: batas kedalaman pohon untuk menghindari overfitting.
-- `min_samples_split=5`: jumlah minimal sampel untuk membagi node.
+- `random_state=42`: untuk memastikan hasil replikasi yang konsisten.
+- Parameter lainnya menggunakan nilai default.
 
 #### Kelebihan:
-+ Mampu menangkap hubungan non-linear antar fitur.  
-+ Relatif tahan terhadap overfitting dan outlier.
+
+- Mampu menangkap hubungan non-linear antar fitur.
+- Relatif tahan terhadap overfitting dan outlier.
 
 #### Kekurangan:
+
 − Interpretasi model lebih kompleks daripada linear regression.  
 − Proses pelatihan dan prediksi memerlukan waktu dan memori lebih besar.
 
 ---
 
-### Model 3: Gradient Boosting Regressor (XGBoost)
+### Model 3: Gradient Boosting Regressor
 
 #### Cara Kerja:
 
-Gradient Boosting membangun model secara bertahap. Setiap model baru dibuat untuk memperbaiki kesalahan model sebelumnya menggunakan pendekatan _gradient descent_. XGBoost adalah versi yang dioptimalkan untuk efisiensi dan kecepatan, serta dilengkapi regularisasi untuk mencegah overfitting.
+Gradient Boosting membangun model secara bertahap. Setiap model baru dibuat untuk memperbaiki kesalahan model sebelumnya menggunakan pendekatan _gradient descent_. Model ini efektif dalam menangani fitur kompleks dan interaksi non-linear.
 
 #### Parameter:
 
-- `learning_rate=0.1`: mengontrol kontribusi setiap pohon.
-- `n_estimators=200`: jumlah boosting rounds.
-- `max_depth=4`: kedalaman maksimum tiap pohon.
-- `early_stopping_rounds=10`: menghentikan pelatihan jika validasi tidak membaik.
+- `n_estimators=100`: jumlah boosting rounds.
+- `random_state=42`: untuk hasil yang konsisten.
+- Parameter lainnya menggunakan nilai default.
 
 #### Kelebihan:
-+ Performa prediksi sangat baik pada data tabular.  
-+ Mampu menangani fitur yang kompleks dan interaksi antar fitur.
+
+- Performa prediksi sangat baik pada data tabular.
+- Mampu menangani fitur yang kompleks dan interaksi antar fitur.
 
 #### Kekurangan:
+
 − Butuh tuning parameter yang teliti untuk performa optimal.  
 − Proses training lebih lama dan lebih kompleks dibanding model lain.
 
@@ -239,49 +280,57 @@ Gradient Boosting membangun model secara bertahap. Setiap model baru dibuat untu
 
 ### Metrik Evaluasi:
 
-- **Root Mean Squared Error (RMSE)**: mengukur kesalahan prediksi rata-rata dalam skala yang sama dengan target.
-- **R² Score**: proporsi variansi target yang dapat dijelaskan oleh fitur input.
+- **Root Mean Squared Error (RMSE)**: Mengukur rata-rata kesalahan prediksi dalam satuan asli (USD).
+- **R² Score**: Proporsi variansi target yang dapat dijelaskan oleh fitur input.
 
-| Model                   | RMSE  | R² Score | Fitur Digunakan |
-| ----------------------- | ----- | -------- | --------------- |
-| Linear Regression       | 0.181 | 0.89     | Semua fitur     |
-| Random Forest Regressor | 0.145 | 0.93     | Semua fitur     |
-| Gradient Boosting       | 0.138 | 0.94     | Semua fitur     |
-| Gradient Boosting       | 0.142 | 0.935    | Top 20 fitur    |
+| Model                     | RMSE (USD) | R² Score | Fitur Digunakan |
+| ------------------------- | ---------- | -------- | --------------- |
+| Linear Regression         | 16,859.43  | 0.89     | Semua fitur     |
+| Linear Regression + Lasso | 16,737.38  | 0.90     | Top fitur       |
+| Random Forest Regressor   | 15,482.64  | 0.91     | Semua fitur     |
+| Random Forest + FS        | 15,276.63  | 0.91     | Top fitur       |
+| Gradient Boosting         | 14,088.34  | 0.93     | Semua fitur     |
+| Gradient Boosting + FS    | 14,000.01  | 0.93     | Top 20 fitur    |
 
-### Analisis dan Hubungan dengan Business Understanding:
+> _Catatan: Target `SalePrice` ditransformasikan ke skala logaritmik selama pelatihan model untuk menstabilkan distribusi. Namun, nilai RMSE dan R² di atas dihitung setelah prediksi dikembalikan ke skala asli menggunakan `np.expm1()`._
 
-Model Gradient Boosting memberikan performa terbaik dengan RMSE terendah dan R² tertinggi (0.94), menandakan bahwa model mampu menjelaskan 94% variasi harga rumah berdasarkan fitur yang tersedia.
+---
 
-#### Dampak terhadap Business Understanding:
+### Analisis dan Keterkaitan dengan Business Understanding:
 
-- **Problem 1** (akurasi prediksi): ✔ Terjawab, model sangat akurat.
-- **Problem 2** (model terbaik): ✔ Terjawab, Gradient Boosting unggul.
-- **Problem 3** (fitur signifikan): ✔ Terjawab, fitur seperti `OverallQual`, `GrLivArea`, dan `GarageCars` terbukti penting.
+Model Gradient Boosting menunjukkan performa terbaik dengan **RMSE terendah (~$14.000)** dan **R² tertinggi (0.93)**. Ini menunjukkan bahwa model mampu menjelaskan sekitar **93% variasi harga rumah**, dengan rata-rata kesalahan prediksi dalam kisaran yang dapat diterima secara bisnis.
 
-#### Dampak terhadap Solusi Bisnis:
+#### Kesesuaian dengan Problem Statements:
 
-- Estimasi harga rumah menjadi **otomatis, cepat, dan konsisten**, bermanfaat bagi agen properti dan pengguna individu.
-- Interpretasi fitur penting dapat membantu pengembang real estate memahami faktor utama yang menaikkan nilai jual rumah.
+- **Problem 1: Akurasi Prediksi** — Model sangat akurat dan realistis.
+- **Problem 2: Model Terbaik** — Gradient Boosting unggul dalam performa.
+- **Problem 3: Fitur Signifikan** — Fitur seperti `OverallQual`, `GrLivArea`, dan `GarageCars` terbukti dominan.
+
+---
 
 ## Kesimpulan
 
-Proyek ini berhasil menunjukkan bagaimana metode machine learning dapat digunakan untuk memprediksi harga rumah berdasarkan berbagai fitur struktural dan lingkungan. Model Gradient Boosting Regressor (XGBoost) terbukti menjadi model terbaik dalam hal akurasi dan kestabilan.
+Proyek ini berhasil menunjukkan bagaimana metode machine learning dapat digunakan untuk memprediksi harga rumah berdasarkan fitur-fitur struktural dan lingkungan yang tersedia.
 
-### Poin-poin utama:
-- **Linear Regression** digunakan sebagai baseline, tetapi kurang efektif untuk data kompleks.
-- **Random Forest** menunjukkan peningkatan akurasi dan mampu menangani interaksi antar fitur.
-- **Gradient Boosting** memberikan hasil terbaik (RMSE: 0.138, R²: 0.94), dan digunakan sebagai model akhir.
-- Feature importance berhasil mengidentifikasi fitur paling berpengaruh seperti `OverallQual`, `GrLivArea`, dan `GarageCars`.
-- Evaluasi model terkait erat dengan tujuan bisnis dan menjawab semua problem statements.
+### Poin-Poin Utama:
 
-Model yang dikembangkan sangat potensial untuk diintegrasikan dalam sistem digital properti, aplikasi valuasi aset, atau alat bantu rekomendasi harga rumah. Ke depan, model dapat dikembangkan lebih lanjut dengan:
-- Menambahkan data spasial (GPS, lokasi kota).
-- Menggunakan data historis harga properti.
-- Mengadopsi teknik ensemble stacking untuk meningkatkan akurasi lebih lanjut.
+- **Linear Regression** digunakan sebagai baseline, namun kurang cocok untuk pola data yang kompleks.
+- **Random Forest Regressor** meningkatkan akurasi dan mampu menangani interaksi non-linear antar fitur.
+- **Gradient Boosting Regressor** menghasilkan performa terbaik dengan **RMSE sekitar $14.000** dan **R² sebesar 0.93**, menjadikannya model akhir.
+- Feature importance dari Gradient Boosting menunjukkan bahwa `OverallQual`, `GrLivArea`, dan `GarageCars` adalah fitur yang paling berpengaruh terhadap harga rumah.
 
-Secara keseluruhan, proyek ini tidak hanya memenuhi kebutuhan teknis modeling, tetapi juga berkontribusi pada solusi nyata dalam domain valuasi properti berbasis data.
+### Relevansi Bisnis:
 
+- Estimasi harga rumah menjadi **otomatis, cepat, dan konsisten**, membantu agen properti, penjual, maupun pembeli.
+- Interpretasi fitur penting dapat digunakan oleh pengembang atau pemilik rumah untuk **meningkatkan nilai jual properti**.
+
+### Pengembangan Lanjutan:
+
+- Integrasi data spasial seperti GPS atau lokasi kota.
+- Penggunaan data historis harga properti untuk tren jangka panjang.
+- Eksperimen dengan teknik ensemble lain seperti **stacking** untuk meningkatkan akurasi.
+
+Secara keseluruhan, proyek ini berhasil memenuhi tujuan teknis dan bisnis, dan berpotensi besar untuk diimplementasikan dalam aplikasi valuasi properti digital.
 
 ## Referensi
 
