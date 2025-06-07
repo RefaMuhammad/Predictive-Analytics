@@ -177,9 +177,20 @@ Outlier pada fitur numerik dideteksi menggunakan metode **IQR (Interquartile Ran
 
 Untuk mengonversi fitur kategorikal ke dalam format numerik yang dapat diproses oleh algoritma machine learning, dilakukan beberapa teknik encoding:
 
+- **Penghapusan Fitur Kategorikal dengan Satu Nilai Unik**:
+
+  Beberapa fitur kategorikal dalam dataset memiliki hanya satu nilai (kategori) yang muncul di hampir seluruh entri. Fitur semacam ini tidak memberikan informasi yang berguna bagi model karena tidak memiliki variasi. Oleh karena itu, fitur-fitur berikut dihapus dari dataset:
+    - Street
+    - Utilities
+    - Condition2
+    - RoofMatl
+    - BsmtFinType2
+
+  Penghapusan dilakukan sebelum proses encoding untuk menghindari pemborosan dimensi dan mencegah noise yang tidak relevan dalam proses pelatihan model. Keputusan ini didasarkan pada analisis distribusi frekuensi kategori dari masing-masing fitur.
+
 - **Ordinal Encoding**:
 
-  - Diterapkan pada fitur kategorikal yang memiliki urutan nilai, seperti: `ExterQual`, `KitchenQual`, `BsmtQual`, `HeatingQC`, dll.
+  - Diterapkan pada fitur kategorikal yang memiliki urutan atau skala tingkat kualitas. Fitur-fitur berikut dikodekan berdasarkan urutan logis atau kualitas yang telah ditentukan: `ExterQual`, `ExterCond`, `BsmtQual`, `BsmtCond`, `BsmtExposure`, `HeatingQC`, `KitchenQual`, `FireplaceQu`, `GarageQual`, `GarageCond`, `GarageFinish`, dan `PavedDrive`.
 
 - **Frequency Encoding**:
 
@@ -187,12 +198,12 @@ Untuk mengonversi fitur kategorikal ke dalam format numerik yang dapat diproses 
 
 - **Label Encoding**:
 
-  - Diterapkan pada beberapa fitur kategorikal lain seperti: `MSZoning`, `LotShape`, `LandContour`, `Utilities`, `Condition2`, `RoofMatl`, `Street`, dan `BsmtFinType2`. Encoding ini memberikan label numerik unik untuk tiap kategori.
+  - Diterapkan pada beberapa fitur kategorikal lain seperti: `MSZoning`, `LotShape`, `LandContour`, `LandSlope`, `Condition1`, `RoofStyle`, `Heating`, dan `BsmtFinType1`. Encoding ini memberikan label numerik unik untuk tiap kategori.
 
 - **One-Hot Encoding**:
-  - Digunakan untuk fitur nominal tertentu jika tidak terlalu banyak kategori unik, misalnya: `BldgType`, `HouseStyle`.
+  - Digunakan pada fitur nominal yang memiliki jumlah kategori terbatas dan tidak memiliki urutan logis. Fitur-fitur yang diberikan one-hot encoding adalah: `LotConfig`, `HouseStyle`, `Exterior1st`, `Exterior2nd`, `SaleType`, `SaleCondition`, `BldgType`, `Foundation`, `GarageType`, `Fence`, `MasVnrType`, `CentralAir`, `Electrical`, `Functional`, dan `GarageFinish`.
 
-### 5. Data Splitting
+### 4. Data Splitting
 
 Data dibagi menjadi:
 
